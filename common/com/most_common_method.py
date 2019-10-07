@@ -8,7 +8,7 @@ class NullObject:
 
 
 def get_now_time():
-    timestr = str(datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+    timestr = str(datetime.now().strftime('%Y%m%d%H%M%S'))
     return timestr
 
 

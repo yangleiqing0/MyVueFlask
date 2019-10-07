@@ -30,7 +30,7 @@ class TestCastList(MethodView):
     def get(self):
         search, user_id = get_values('search', 'user_id', post=False)
         user = User.query.get(user_id)
-        _list = TestCases.query.filter(TestCases.user_id == user_id). \
+        _list = TestCases.query.filter(TestCases.user_id == user_id, TestCases.testcase_scene_id.is_(None)). \
             order_by(TestCases.timestamp.desc()).all()
         case_groups = user.user_case_groups
         request_headers = user.user_request_headers
@@ -197,14 +197,10 @@ class TestCaseDownload(MethodView):
 
     def get(self):
         user_id = session.get('user_id')
-        page = get_values('page')
         testcases = TestCases.query.filter(TestCases.testcase_scene_id.is_(None), TestCases.user_id == user_id). \
             with_entities(TestCases.id, TestCases.name, TestCases.method, TestCases.url, TestCases.data,
                           TestCases.regist_variable, TestCases.regular, TestCases.group_id.name,
                           TestCases.request_headers_id, TestCases.testcase_scene_id, TestCases.hope_result).all()
-        if len(testcases) == 0:
-            flash("请先添加用例")
-            return redirect(url_for('testcase_blueprint.test_case_list', page=page))
         now = get_now_time()
         dir_path, xlsx_name = WriterXlsx('testcases_' + now, testcases).open_xlsx()
         return send_from_directory(dir_path, xlsx_name, as_attachment=True)
@@ -213,9 +209,9 @@ class TestCaseDownload(MethodView):
 class TestCaseUpload(MethodView):
 
     def post(self):
-        page = get_values('page')
         if request.files.get('upload_xlsx'):
             xlsx = request.files['upload_xlsx']
+            print('xlsx', xlsx)
             if allowed_file(xlsx.filename):
                 now = get_now_time()
                 dir_path = TESTCASE_XLSX_PATH + 'upload'
@@ -228,10 +224,10 @@ class TestCaseUpload(MethodView):
                 os.remove(xlsx_path)
             else:
                 flash('错误的文件格式')
-                return redirect(url_for('testcase_blueprint.test_case_list', page=page))
+                return redirect(url_for('testcase_blueprint.test_case_list'))
         else:
             flash('请选择上传文件')
-        return redirect(url_for('testcase_blueprint.test_case_list', page=page))
+        return redirect(url_for('testcase_blueprint.test_case_list'))
 
 
 class TestCaseValidata(MethodView):
@@ -294,8 +290,8 @@ testcase_blueprint.add_url_rule('/case_edit', view_func=UpdateTestCase.as_view('
 testcase_blueprint.add_url_rule('/case_run', view_func=TestCaseRun.as_view('case_run'))
 testcase_blueprint.add_url_rule('/copy_test_case/', view_func=TestCaseCopy.as_view('copy_test_case'))
 testcase_blueprint.add_url_rule('/test_case_urls/', view_func=TestCaseUrls.as_view('test_case_urls'))
-testcase_blueprint.add_url_rule('/test_case_download/', view_func=TestCaseDownload.as_view('test_case_download'))
-testcase_blueprint.add_url_rule('/test_case_upload/', view_func=TestCaseUpload.as_view('test_case_upload'))
+testcase_blueprint.add_url_rule('/case_download', view_func=TestCaseDownload.as_view('case_download'))
+testcase_blueprint.add_url_rule('/case_upload', view_func=TestCaseUpload.as_view('case_upload'))
 
 testcase_blueprint.add_url_rule('/case_validate', view_func=TestCaseValidata.as_view('case_validate'))
 testcase_blueprint.add_url_rule('/regular_validate', view_func=RegularValidata.as_view('regular_validate'))
