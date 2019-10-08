@@ -35,6 +35,8 @@ class TestCastList(MethodView):
         case_groups = user.user_case_groups
         request_headers = user.user_request_headers
         mysqls = user.user_mysqls
+        for mysql in mysqls:
+            mysql.name = AnalysisParams().analysis_params(mysql.name)
         case_groups, request_headers, mysqls = all_to_dict(_list, case_groups, request_headers, mysqls, wait=True)
         return jsonify({
             'list': _list,
