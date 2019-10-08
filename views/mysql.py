@@ -116,7 +116,7 @@ mysql_blueprint.add_url_rule('/mysql_edit', view_func=MysqlUpdate.as_view('mysql
 mysql_blueprint.add_url_rule('/mysql_list', view_func=MysqlList.as_view('mysql_list'))
 mysql_blueprint.add_url_rule('/mysql_del', view_func=MysqlDelete.as_view('mysql_del'))
 
-mysql_blueprint.add_url_rule('/mysql_run/', view_func=MysqlRun.as_view('mysql_run'))
+mysql_blueprint.add_url_rule('/mysql_run', view_func=MysqlRun.as_view('mysql_run'))
 mysql_blueprint.add_url_rule('/mysql_test/', view_func=MysqlTest.as_view('mysql_test'))
 
 mysql_blueprint.add_url_rule('/mysql_validate', view_func=MysqlNameValidate.as_view('mysql_validate'))
