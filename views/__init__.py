@@ -13,6 +13,7 @@ from .mysql import mysql_blueprint
 from .home import home_blueprint
 from .testcase_report import testcase_report_blueprint
 from .testcase import testcase_blueprint
+from .scene import testcase_scene_blueprint
 
 
 view_list = []

@@ -22,6 +22,6 @@ class TestCaseScene(BaseModel, db.Model):
         return "<TestCaseScene:%s,%s,%s, %s, %s, %s>" % (
             self.id, self.name, self.group_id, self.description, self.is_model, self.user_id)
 
-    def to_json(self):
+    def to_dict(self, children=''):
         return dict(id=self.id, name=self.name, group_id=self.group_id, description=self.description,
-                    is_model=self.is_model, user_id=self.user_id)
+                    is_model=self.is_model, user_id=self.user_id, children=children)

@@ -41,11 +41,11 @@ def post_del(_object, _name):
     __object = get_values('id')
     if isinstance(__object, list):
         for g in __object:
-            case_group = _object.query.get(g.get('id'))
-            db.session.delete(case_group)
+            _g = _object.query.get(g.get('id'))
+            db.session.delete(_g)
         db.session.commit()
         return jsonify(msg='删除{}列表成功'.format(_name))
-    case_group = _object.query.get(__object.get('id'))
-    db.session.delete(case_group)
+    o = _object.query.get(__object.get('id'))
+    db.session.delete(o)
     db.session.commit()
     return jsonify(msg='删除{}成功'.format(_name))
