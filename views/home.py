@@ -16,7 +16,7 @@ home_blueprint = Blueprint('home_blueprint', __name__)
 class Home(MethodView):
 
     def get(self):
-        return 'OK'
+        return jsonify(True)
 
 
 app = return_app()

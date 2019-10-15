@@ -16,6 +16,8 @@ def all_to_dict(objects, *args, wait=False, model=None):
                     for case in objects[i].testcases:
                         case_list.append(case.to_dict())
                     objects[i] = objects[i].to_dict(case_list)
+                else:
+                    objects[i] = objects[i].to_dict()
             else:
                 objects[i] = objects[i].to_dict()
     if args:

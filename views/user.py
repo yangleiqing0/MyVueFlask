@@ -10,7 +10,7 @@ user_blueprint = Blueprint('user_blueprint', __name__)
 
 class UserRegist(MethodView):
 
-    def get(self):
+    def post(self):
         project_groups = ProjectGroup.query.all()
         return 'OK'
 

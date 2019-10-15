@@ -10,7 +10,7 @@ case_group_blueprint = Blueprint('case_group_blueprint', __name__)
 
 class CaseGroupList(MethodView):
 
-    def get(self):
+    def post(self):
         return get_list(CaseGroup)
 
 

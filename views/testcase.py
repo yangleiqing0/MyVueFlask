@@ -27,12 +27,14 @@ class TestCaseRun(MethodView):
 
 class TestCastList(MethodView):
 
-    def get(self):
-        search, user_id = get_values('search', 'user_id', post=False)
+    def post(self):
+        search, user_id, page, pagesize = get_values('search', 'user_id', 'page', 'pagesize')
         user = User.query.get(user_id)
         _list = TestCases.query.filter(TestCases.user_id == user_id, TestCases.testcase_scene_id.is_(None)). \
-            order_by(TestCases.timestamp.desc()).all()
+            order_by(TestCases.timestamp.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
         case_groups = user.user_case_groups
+        count = TestCases.query.filter(TestCases.user_id == user_id, TestCases.testcase_scene_id.is_(None)). \
+            order_by(TestCases.timestamp.desc()).count()
         request_headers = user.user_request_headers
         mysqls = user.user_mysqls
         for mysql in mysqls:
@@ -42,7 +44,8 @@ class TestCastList(MethodView):
             'list': _list,
             'groups': case_groups,
             'headers': request_headers,
-            'mysqls': mysqls
+            'mysqls': mysqls,
+            'count':count
         })
 
 

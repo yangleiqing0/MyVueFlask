@@ -222,7 +222,7 @@ def get_report(testcase_time_id):
 
 class TestCaseReportList(MethodView):
 
-    def get(self):
+    def post(self):
         return get_list(TestCaseStartTimes)
 
 

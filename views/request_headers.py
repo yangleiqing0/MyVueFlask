@@ -11,7 +11,7 @@ request_headers_blueprint = Blueprint('request_headers_blueprint', __name__)
 
 class RequestHeadersList(MethodView):
 
-    def get(self):
+    def post(self):
         return get_list(RequestHeaders)
 
 

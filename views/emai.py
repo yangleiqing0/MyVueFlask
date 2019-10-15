@@ -18,7 +18,7 @@ class MailUpdate(MethodView):
 
 
 class MailList(MethodView):
-    def get(self):
+    def post(self):
         return get_list(Mail)
 
 

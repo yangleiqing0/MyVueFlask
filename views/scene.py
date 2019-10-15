@@ -19,10 +19,13 @@ class TestCaseSceneUpdate(MethodView):
 
 class TestCaseSceneTestCaseList(MethodView):
 
-    def get(self):
-        search, user_id = get_values('search', 'user_id', post=False)
+    def post(self):
+        search, user_id, page, pagesize = get_values('search', 'user_id', 'page', 'pagesize')
         user = User.query.get(user_id)
-        _list = TestCaseScene.query.filter(TestCaseScene.user_id == user_id).order_by(TestCaseScene.timestamp.desc()).all()
+        _list = TestCaseScene.query.filter(TestCaseScene.user_id == user_id).order_by(
+            TestCaseScene.timestamp.desc(), TestCaseScene.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
+        count = TestCaseScene.query.filter(TestCaseScene.user_id == user_id).order_by(
+            TestCaseScene.timestamp.desc(), TestCaseScene.id.desc()).count()
         model_scenes = TestCaseScene.query.filter(TestCaseScene.is_model == 1,
                                                   TestCaseScene.user_id == user_id).all()
         model_cases = TestCases.query.filter(TestCases.is_model == 1, TestCases.user_id == user_id).all()
@@ -33,7 +36,8 @@ class TestCaseSceneTestCaseList(MethodView):
             'list': _list,
             'groups': case_groups,
             'model_scenes': model_scenes,
-            'model_cases': model_cases
+            'model_cases': model_cases,
+            'count': count
         })
 
 

@@ -9,7 +9,7 @@ variables_blueprint = Blueprint('variables_blueprint', __name__)
 
 class VariableList(MethodView):
 
-    def get(self):
+    def post(self):
         return get_list(Variables)
 
 

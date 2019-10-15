@@ -4,22 +4,29 @@ from flask import jsonify
 
 
 def get_list(_object):
-    search, user_id = get_values('search', 'user_id', post=False)
-    print('search', search, user_id)
+    search, user_id,  page, pagesize = get_values('search', 'user_id', 'page', 'pagesize')
+    print('search', search, user_id,  page, pagesize)
     if user_id:
         if _object == Variables:
             _list = _object.query.filter(_object.user_id == user_id, _object.is_private == 0). \
-                order_by(_object.timestamp.desc()).all()
+                order_by(_object.timestamp.desc(), _object.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
+            count = _object.query.filter(_object.user_id == user_id, _object.is_private == 0). \
+                order_by(_object.timestamp.desc(), _object.id.desc()).count()
         elif _object == TestCaseStartTimes:
             _list = _object.query.filter(_object.name != "", _object.user_id == user_id).order_by(
-                _object.timestamp.desc()).all()
+                _object.timestamp.desc(), _object.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
+            count = _object.query.filter(_object.name != "", _object.user_id == user_id).order_by(
+                _object.timestamp.desc(), _object.id.desc()).count()
         else:
             _list = _object.query.filter(_object.user_id == user_id). \
-                order_by(_object.timestamp.desc()).all()
+                order_by(_object.timestamp.desc(), _object.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
+            count = _object.query.filter(_object.user_id == user_id). \
+                order_by(_object.timestamp.desc(), _object.id.desc()).count()
         all_to_dict(_list)
+
     else:
-        _list = [{}]
-    return jsonify({'list': _list})
+        _list, count = [{}], 0
+    return jsonify({'list': _list, 'count': count})
 
 
 def post_edit(_object, _id, _name, **kwargs):
