@@ -4,10 +4,18 @@ from flask import jsonify
 
 
 def get_list(_object):
-    search, user_id,  page, pagesize = get_values('search', 'user_id', 'page', 'pagesize')
+    search, user_id,  page, pagesize, _all = get_values('search', 'user_id', 'page', 'pagesize', 'all')
     print('search', search, user_id,  page, pagesize)
+    if not isinstance(page, int) or page <= 0:
+        page = 1
     if user_id:
-        if _object == Variables:
+
+        if _all:
+            _list = _object.query.filter(_object.user_id == user_id). \
+                order_by(_object.timestamp.desc(), _object.id.desc()).all()
+            count = len(_list)
+
+        elif _object == Variables:
             _list = _object.query.filter(_object.user_id == user_id, _object.is_private == 0). \
                 order_by(_object.timestamp.desc(), _object.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
             count = _object.query.filter(_object.user_id == user_id, _object.is_private == 0). \
