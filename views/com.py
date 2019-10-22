@@ -19,11 +19,6 @@ def get_list(_object):
                 order_by(_object.timestamp.desc(), _object.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
             count = _object.query.filter(_object.user_id == user_id, _object.is_private == 0). \
                 order_by(_object.timestamp.desc(), _object.id.desc()).count()
-        elif _object == TestCaseStartTimes:
-            _list = _object.query.filter(_object.name != "", _object.user_id == user_id).order_by(
-                _object.timestamp.desc(), _object.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
-            count = _object.query.filter(_object.name != "", _object.user_id == user_id).order_by(
-                _object.timestamp.desc(), _object.id.desc()).count()
         else:
             _list = _object.query.filter(_object.user_id == user_id). \
                 order_by(_object.timestamp.desc(), _object.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()

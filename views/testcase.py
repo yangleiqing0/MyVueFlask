@@ -256,7 +256,7 @@ class TestCaseValidata(MethodView):
 class TestCaseHopeResultValidata(MethodView):
 
     def post(self):
-        hope_result = request.args.get('hope_result')
+        hope_result = get_values('hope_result')
         print('hope_result: ', hope_result)
         try:
             hope_results = hope_result.split(',')
