@@ -20,7 +20,10 @@ class TestCaseSceneUpdate(MethodView):
 class TestCaseSceneTestCaseList(MethodView):
 
     def post(self):
-        search, user_id, page, pagesize = get_values('search', 'user_id', 'page', 'pagesize')
+        search, user_id, page, pagesize, _id = get_values('search', 'user_id', 'page', 'pagesize', 'id')
+        if _id:
+            _list = TestCaseScene.query.get(_id).to_dict()
+            return jsonify({'list': _list})
         user = User.query.get(user_id)
         _list = TestCaseScene.query.filter(TestCaseScene.user_id == user_id).order_by(
             TestCaseScene.timestamp.desc(), TestCaseScene.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
@@ -43,19 +46,17 @@ class TestCaseSceneTestCaseList(MethodView):
 
 class TestCaseSceneRun(MethodView):
 
-    def get(self):
-        testcase_scene_id = request.args.get('testcase_scene_id')
+    def post(self):
+        testcase_scene_id = get_values('id')
         testcase_scene = TestCaseScene.query.get(testcase_scene_id)
         testcases = testcase_scene.testcases
-        if not testcases:
-            return json.dumps({'testcase_results': "场景未存在用例"})
         testcase_results = []
         for testcase in testcases:
             testcase_result, regist_variable_value = to_execute_testcase(testcase)
             testcase_results.extend(['【%s】' % testcase.name, testcase_result])
         testcase_results_html = '<br>'.join(testcase_results)
         print('TestCaseSceneRun: ', json.dumps({'testcase_results': testcase_results_html}))
-        return json.dumps({'testcase_results': testcase_results_html})
+        return json.dumps(testcase_results_html)
 
 
 class TestCaseSceneDelete(MethodView):
@@ -75,6 +76,7 @@ class TestCaseSceneDelete(MethodView):
             db.session.commit()
             return jsonify(msg='删除{}列表成功'.format(_name))
         _scene = TestCaseScene.query.get(scene.get('id'))
+        print('scene', _scene)
         testcases = TestCases.query.join(TestCaseScene, TestCases.testcase_scene_id == TestCaseScene.id). \
             filter(TestCases.testcase_scene_id == scene.get('id')).all()
 
@@ -184,7 +186,7 @@ testcase_scene_blueprint.add_url_rule('/testcase_scene_model/<testcase_scene_id>
 testcase_scene_blueprint.add_url_rule('/testcase_scene_copy/', view_func=TestCaseSceneTestCaseCopy.as_view('testcase_scene_copy'))
 testcase_scene_blueprint.add_url_rule('/scene_list', view_func=TestCaseSceneTestCaseList.as_view('scene_list'))
 testcase_scene_blueprint.add_url_rule('/scene_del', view_func=TestCaseSceneDelete.as_view('scene_del'))
-testcase_scene_blueprint.add_url_rule('/testcase_scene_run/', view_func=TestCaseSceneRun.as_view('testcase_scene_run'))
+testcase_scene_blueprint.add_url_rule('/scene_run', view_func=TestCaseSceneRun.as_view('scene_run'))
 
 testcase_scene_blueprint.add_url_rule('/scene_validate', view_func=TestCaseSceneUpdateValidate.as_view('scene_validate'))
 

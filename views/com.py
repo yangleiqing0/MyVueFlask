@@ -4,8 +4,11 @@ from flask import jsonify
 
 
 def get_list(_object):
-    search, user_id,  page, pagesize, _all = get_values('search', 'user_id', 'page', 'pagesize', 'all')
+    search, user_id,  page, pagesize, _all, _id = get_values('search', 'user_id', 'page', 'pagesize', 'all', 'id')
     print('search', search, user_id,  page, pagesize)
+    if _id:
+        data = _object.query.get(_id).to_dict()
+        return jsonify({'list': data})
     if not isinstance(page, int) or page <= 0:
         page = 1
     if user_id:

@@ -28,7 +28,14 @@ class TestCaseRun(MethodView):
 class TestCastList(MethodView):
 
     def post(self):
-        search, user_id, page, pagesize = get_values('search', 'user_id', 'page', 'pagesize')
+        search, user_id, page, pagesize, _id = get_values('search', 'user_id', 'page', 'pagesize', 'id')
+        if _id:
+            case = TestCases.query.get(_id)
+            if case.wait:
+                _list = case.to_dict(case.wait[0].to_dict())
+            else:
+                _list = case.to_dict()
+            return jsonify({'list': _list})
         user = User.query.get(user_id)
         _list = TestCases.query.filter(TestCases.user_id == user_id, TestCases.testcase_scene_id.is_(None)). \
             order_by(TestCases.timestamp.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
@@ -45,7 +52,7 @@ class TestCastList(MethodView):
             'groups': case_groups,
             'headers': request_headers,
             'mysqls': mysqls,
-            'count':count
+            'count': count
         })
 
 
@@ -180,8 +187,8 @@ class DeleteTestCase(MethodView):
         if Wait.query.filter(Wait.testcase_id == case.get('id')).count() > 0:
             wait = Wait.query.filter(Wait.testcase_id == case.get('id')).first()
             db.session.delete(wait)
-        case_group = TestCases.query.get(case.get('id'))
-        db.session.delete(case_group)
+        _case = TestCases.query.get(case.get('id'))
+        db.session.delete(_case)
         db.session.commit()
         return jsonify(msg='删除{}成功'.format(_name))
 
