@@ -195,14 +195,16 @@ class DeleteTestCase(MethodView):
 
 class TestCaseUrls(MethodView):
 
-    def get(self):
+    def post(self):
         user_id = session.get('user_id')
         urls_sql = 'select url from testcases where user_id=%s'
         urls = list(set(cdb().query_db(urls_sql, params=(user_id,))))
         testcases_urls = []
         [testcases_urls.append(AnalysisParams().analysis_params(url[0])) for url in urls]
         testcases_urls.sort()
-        return render_template('test_case/testcase_urls.html', testcases_urls=testcases_urls)
+        case_urls = []
+        [case_urls.append({'url': url})for url in testcases_urls]
+        return jsonify({'list': case_urls})
 
 
 class TestCaseDownload(MethodView):
@@ -301,7 +303,7 @@ testcase_blueprint.add_url_rule('/case_del', view_func=DeleteTestCase.as_view('c
 testcase_blueprint.add_url_rule('/case_edit', view_func=UpdateTestCase.as_view('case_edit'))
 testcase_blueprint.add_url_rule('/case_run', view_func=TestCaseRun.as_view('case_run'))
 testcase_blueprint.add_url_rule('/copy_test_case/', view_func=TestCaseCopy.as_view('copy_test_case'))
-testcase_blueprint.add_url_rule('/test_case_urls/', view_func=TestCaseUrls.as_view('test_case_urls'))
+testcase_blueprint.add_url_rule('/case_url', view_func=TestCaseUrls.as_view('case_url'))
 testcase_blueprint.add_url_rule('/case_download', view_func=TestCaseDownload.as_view('case_download'))
 testcase_blueprint.add_url_rule('/case_upload', view_func=TestCaseUpload.as_view('case_upload'))
 
