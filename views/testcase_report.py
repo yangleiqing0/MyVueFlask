@@ -115,32 +115,22 @@ class Testcaseresult:
 
 class TestCaseReport(MethodView):
 
-    def get(self, email=False, testcase_time_id=None):
-        testcase_time_id = request.args.get('testcase_time_id', testcase_time_id)
+    def post(self, email=False):
+        testcase_time_id = get_values('id')
+        print('testcase_time_id:', testcase_time_id)
         testcase_results = Testcaseresult(testcase_time_id).testcase_results
         items = []
         for testcase_result in testcase_results:
             print('testcase_result:', testcase_result)
             items.append(Test(testcase_result))
-        allocation = TimeMessage.query.filter(TimeMessage.time_id == testcase_time_id).first()
+        allocation = TimeMessage.query.filter(TimeMessage.time_id == testcase_time_id).first().to_dict()
         testcase_scene_list = TestCaseSceneResult.query.filter(TestCaseSceneResult.time_id == testcase_time_id).all()
         for testcase_scene in testcase_scene_list:
             testcase_scene.test_cases = TestCaseResult.query.filter(TestCaseResult.scene_id == testcase_scene.scene_id, TestCaseResult.testcase_start_time_id == testcase_time_id).all()
 
         if email:
             return items, allocation, testcase_scene_list
-        return render_template("testcase_report/testcase_report.html", items=items, allocation=allocation,
-                               testcase_scene_list=testcase_scene_list)
-
-    def post(self):
-        testcase_time_id = request.args.get('testcase_time_id')
-        # 生成测试报告
-        get_report(testcase_time_id)
-        items, allocation, testcase_scene_list = add_message(testcase_time_id)
-
-        # return items, Allocation
-        return render_template("testcase_report/testcase_report.html", items=items, allocation=allocation,
-                               testcase_scene_list=testcase_scene_list)
+        return jsonify({'allocation': allocation})
 
 
 def add_message(testcase_time_id):
@@ -304,7 +294,7 @@ class TestCaseReportSendMail(MethodView):
         return jsonify(msg=result)
 
 
-testcase_report_blueprint.add_url_rule('/testcasereport/', view_func=TestCaseReport.as_view('testcase_report'))
+testcase_report_blueprint.add_url_rule('/report', view_func=TestCaseReport.as_view('report'))
 testcase_report_blueprint.add_url_rule('/report_list', view_func=TestCaseReportList.as_view('report_list'))
 testcase_report_blueprint.add_url_rule('/report_del', view_func=TestCaseReportDelete.as_view('report_del'))
 testcase_report_blueprint.add_url_rule('/report_download', view_func=TestCaseReportDownLoad.as_view('report_download'))

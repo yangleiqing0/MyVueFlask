@@ -32,3 +32,9 @@ class TimeMessage(Base, db.Model):
         self.time_strftime = time_strftime
         self.score = score
         self.time_id = time_id
+
+    def to_dict(self):
+        return dict(test_name=self.test_name, zdbm_version=self.zdbm_version, test_pl=self.test_pl,
+                    test_net=self.test_net, title_name=self.title_name, fail_sum=self.fail_sum, test_sum=self.test_sum,
+                    test_success=self.test_success, time_strftime=self.time_strftime, score=self.score,
+                    time_id=self.time_id)

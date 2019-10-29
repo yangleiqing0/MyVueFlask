@@ -1,7 +1,7 @@
 from flask import request
 
 
-def get_values(*args, post=True):
+def get_values(*args, post=True, default=''):
     print('args:', args)
     arg_list = []
     if post:
@@ -11,7 +11,7 @@ def get_values(*args, post=True):
             arg_list = arg_list[0]
     else:
         for arg in args:
-            arg_list.append(request.values.get(arg, default=''))
+            arg_list.append(request.values.get(arg, default=default))
         if len(arg_list) == 1:
             arg_list = arg_list[0]
     return arg_list
