@@ -67,12 +67,19 @@ class Test:
         self.method, self.response_body, self.old_database_value, self.new_database_value, self.result, \
         self.old_sql_value_result, self.new_sql_value_result, self.test_result  \
             = testcase_result[2], testcase_result[4], testcase_result[6], testcase_result[7], testcase_result[11], \
-        testcase_result[9], testcase_result[10], testcase_result[8]
+            testcase_result[9], testcase_result[10], testcase_result[8]
+        self.scene_id = None
 
         try:
             self.scene_id = testcase_result[12]
         except Exception:
             pass
+
+    def to_dict(self):
+        return dict(t_name=self.t_name, url=self.url, request_body=self.request_body, hope=self.hope, method=self.method
+                    , response_body=self.response_body, old_database_value=self.old_database_value, new_database_value=
+                    self.new_database_value, result=self.result, old_sql_value_result=self.old_sql_value_result,
+                    new_sql_value_result=self.new_sql_value_result, test_result=self.test_result, scene_id=self.scene_id)
 
 
 class Testcaseresult:
@@ -122,7 +129,7 @@ class TestCaseReport(MethodView):
         items = []
         for testcase_result in testcase_results:
             print('testcase_result:', testcase_result)
-            items.append(Test(testcase_result))
+            items.append(Test(testcase_result).to_dict())
         allocation = TimeMessage.query.filter(TimeMessage.time_id == testcase_time_id).first().to_dict()
         testcase_scene_list = TestCaseSceneResult.query.filter(TestCaseSceneResult.time_id == testcase_time_id).all()
         for testcase_scene in testcase_scene_list:
@@ -130,7 +137,11 @@ class TestCaseReport(MethodView):
 
         if email:
             return items, allocation, testcase_scene_list
-        return jsonify({'allocation': allocation})
+        print('items:', items)
+        return jsonify({
+            'allocation': allocation,
+            'items': items
+        })
 
 
 def add_message(testcase_time_id):
