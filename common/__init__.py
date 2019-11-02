@@ -10,7 +10,7 @@ from config import db
 from datetime import datetime
 from .com.connect_mysql import ConnMysql
 from .com.connect_sqlite import cdb
-from .com.all_to_dict import all_to_dict
+from .com.all_to_dict import all_to_dict, to_dict, scene_result_dict
 from .com.rand_name import RangName
 from .com.analysis_params import AnalysisParams
 from .selenium_get_page import ReportImage

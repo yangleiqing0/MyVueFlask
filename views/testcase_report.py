@@ -2,7 +2,7 @@ from flask.views import MethodView
 from sqlalchemy import or_
 from flask import render_template, Blueprint, request, redirect, url_for, send_from_directory, session, jsonify, \
     Response
-from common import get_values, db, cdb, AnalysisParams, send_excel, send_mail, test_report, os, re
+from common import get_values, db, cdb, AnalysisParams, send_excel, send_mail, test_report, os, re, to_dict, scene_result_dict
 from modles import TestCaseSceneResult, Variables, TestCaseStartTimes, TestCaseResult, TestCaseScene, TestCases, \
     TimeMessage, datetime
 from . import get_list, post_del
@@ -137,7 +137,9 @@ class TestCaseReport(MethodView):
 
         if email:
             return items, allocation, testcase_scene_list
-        print('items:', items)
+        scene_result_dict(testcase_scene_list)
+        print('items:', testcase_scene_list, items)
+        items.extend(testcase_scene_list)
         return jsonify({
             'allocation': allocation,
             'items': items

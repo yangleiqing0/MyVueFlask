@@ -30,3 +30,19 @@ def all_to_dict(objects, *args, wait=False, model=None):
                 arg.append(_arg[a].to_dict())
             object_list.append(arg)
         return object_list
+
+
+def to_dict(li):
+    for r in range(len(li)):
+        li[r] = li[r].get_dict()
+
+
+def scene_result_dict(scene_list):
+    for i in range(len(scene_list)):
+        if scene_list[i].test_cases:
+            case_result_list = []
+            for case in scene_list[i].test_cases:
+                case_result_list.append(case.get_dict())
+            scene_list[i] = scene_list[i].to_dict(case_result_list)
+        else:
+            scene_list[i] = scene_list[i].to_dict()
