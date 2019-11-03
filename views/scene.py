@@ -5,6 +5,7 @@ from flask import render_template, Blueprint, request, redirect, url_for, jsonif
 from common import get_values, to_execute_testcase, all_to_dict
 from modles import db, TestCases, TestCaseScene, User, Wait
 from views import post_edit
+from views.testcase_request import post_testcase
 
 testcase_scene_blueprint = Blueprint('testcase_scene_blueprint', __name__)
 
@@ -52,7 +53,7 @@ class TestCaseSceneRun(MethodView):
         testcases = testcase_scene.testcases
         testcase_results = []
         for testcase in testcases:
-            testcase_result, regist_variable_value = to_execute_testcase(testcase)
+            testcase_result, regist_variable_value = post_testcase(testcase=testcase)
             testcase_results.extend(['【%s】' % testcase.name, testcase_result])
         testcase_results_html = '<br>'.join(testcase_results)
         print('TestCaseSceneRun: ', json.dumps({'testcase_results': testcase_results_html}))

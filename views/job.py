@@ -72,17 +72,8 @@ class JobUpdate(MethodView):
 
 class JobDelete(MethodView):
 
-    def get(self):
-        page, job_id = get_values('page', 'job_id')
-        job = Job.query.get(job_id)
-        job.is_start = 0
-        db.session.commit()
-        scheduler_job(job)
-        db.session.delete(job)
-        db.session.commit()
-        # app.logger.info('message:delete testcases success, id: %s' % id)
-        session['msg'] = '删除成功'
-        return redirect(url_for('job_blueprint.job_list', page=page))
+    def post(self):
+        return post_del(Job, '任务')
 
 
 class JobSchedulerUpdate(MethodView):
@@ -152,7 +143,7 @@ class JobUpdateValidate(MethodView):
 job_blueprint.add_url_rule('/job_add/', view_func=JobAdd.as_view('job_add'))
 job_blueprint.add_url_rule('/job_edit', view_func=JobUpdate.as_view('job_edit'))
 job_blueprint.add_url_rule('/job_list', view_func=JobList.as_view('job_list'))
-job_blueprint.add_url_rule('/job_delete/', view_func=JobDelete.as_view('job_delete'))
+job_blueprint.add_url_rule('/job_del', view_func=JobDelete.as_view('job_del'))
 job_blueprint.add_url_rule('/job_run/', view_func=JobRun.as_view('job_run'))
 
 job_blueprint.add_url_rule('/job_scheduler_update/', view_func=JobSchedulerUpdate.as_view('job_scheduler_update'))

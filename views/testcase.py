@@ -1,4 +1,5 @@
 # encoding=utf-8
+from views.testcase_request import post_testcase
 from . import os, json, datetime, get_list, post_del, post_edit
 from flask.views import MethodView
 from flask import render_template, Blueprint, request, redirect, url_for, jsonify, session, send_from_directory, flash
@@ -19,7 +20,7 @@ class TestCaseRun(MethodView):
             = get_values('name', 'url', 'data', 'method', 'header_id', 'regist_variable', 'regular', 'group_id')
         testcase.testcase_request_header = RequestHeaders.query.get(request_headers_id)
         testcase_results = []
-        testcase_result, regist_variable_value = to_execute_testcase(testcase)
+        testcase_result, regist_variable_value = post_testcase(testcase=testcase, is_commit=False)
         testcase_results.extend(['【%s】' % testcase.name, testcase_result, '【正则匹配的值】', regist_variable_value])
         testcase_results_html = '<br>'.join(testcase_results)
         return jsonify(testcase_results_html)

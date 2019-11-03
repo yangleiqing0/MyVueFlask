@@ -1,5 +1,5 @@
 from common import get_values, all_to_dict
-from modles import Variables, db, TestCaseStartTimes
+from modles import Variables, db, TestCaseStartTimes, Job
 from flask import jsonify
 
 
@@ -50,14 +50,23 @@ def post_edit(_object, _id, _name, **kwargs):
 
 
 def post_del(_object, _name):
+    from views.job import scheduler_job
     __object = get_values('id')
     if isinstance(__object, list):
         for g in __object:
             _g = _object.query.get(g.get('id'))
+            if _object == Job:
+                _g.is_start = 0
+                db.session.commit()
+                scheduler_job(_g)
             db.session.delete(_g)
         db.session.commit()
         return jsonify(msg='删除{}列表成功'.format(_name))
     o = _object.query.get(__object.get('id'))
+    if _object == Job:
+        o.is_start = 0
+        db.session.commit()
+        scheduler_job(o)
     db.session.delete(o)
     db.session.commit()
     return jsonify(msg='删除{}成功'.format(_name))
