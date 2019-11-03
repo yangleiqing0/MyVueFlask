@@ -20,4 +20,5 @@ from .com.method_request import MethodRequest
 from .com.most_common_method import get_now_time, clear_download_xlsx, read_xlsx, NullObject, is_json
 from .regist_variables import to_regist_variables
 from .com.execute_testcase import to_execute_testcase
+from .com.assert_method import AssertMethod
 

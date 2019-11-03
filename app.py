@@ -5,6 +5,7 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 from config import app_config
 from common import ConnMysql
+from flask_apscheduler import APScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 # flask_mail需要安装0.9.1版本
 
@@ -73,6 +74,18 @@ def get_app_mail():
     mail = Mail(app)
     return app, mail
 
+
+def my_listener(event):
+    if event.exception:
+        print('任务出错了！！！！！！')
+    else:
+        print('任务照常运行...')
+
+
+scheduler = APScheduler()
+
+scheduler.add_listener(my_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+scheduler.start()
 
 manager = Manager(app)
 # 第一个参数是Flask的实例，第二个参数是Sqlalchemy数据库实例

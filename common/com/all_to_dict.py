@@ -19,7 +19,7 @@ def all_to_dict(objects, *args, wait=False, model=None):
                 else:
                     objects[i] = objects[i].to_dict()
             else:
-                objects[i] = objects[i].to_dict()
+                objects[i] = objects[i].get_dict()
     if args:
         object_list = []
         for arg in args:
@@ -27,7 +27,7 @@ def all_to_dict(objects, *args, wait=False, model=None):
             del arg
             arg = []
             for a in range(len(_arg)):
-                arg.append(_arg[a].to_dict())
+                arg.append(_arg[a].get_dict())
             object_list.append(arg)
         return object_list
 

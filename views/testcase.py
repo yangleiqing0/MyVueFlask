@@ -29,6 +29,7 @@ class TestCastList(MethodView):
 
     def post(self):
         search, user_id, page, pagesize, _id = get_values('search', 'user_id', 'page', 'pagesize', 'id')
+        print('case_list', search, user_id, page, pagesize, _id)
         if _id:
             case = TestCases.query.get(_id)
             if case.wait:
