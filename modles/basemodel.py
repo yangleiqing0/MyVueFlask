@@ -11,7 +11,7 @@ class Base:
 
     def get_dict(self, *args):
         if args:
-            return {col.name: getattr(self, col.name) for col in args}
+            return {col: getattr(self, col) for col in args}
         return {col.name: getattr(self, col.name) for col in self.__table__.columns}
 
 

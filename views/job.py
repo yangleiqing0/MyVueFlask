@@ -37,15 +37,19 @@ class JobUpdate(MethodView):
             is_start = 1
         # testcases = request.form.getlist('testcase')
         # testcase_scenes = request.form.getlist('testcase_scene')
-        # print('JobUpdate post:', testcases, testcase_scenes, is_start)
-        # if len(testcases) > 0:
-        #     testcases = ','.join(testcases)+','
-        # else:
-        #     testcases = ''
-        # if len(testcase_scenes) > 0:
-        #     testcase_scenes = ','.join(testcase_scenes)+','
-        # else:
-        #     testcase_scenes = ''
+        print('JobUpdate post:', testcases, testcase_scenes, type(testcases), is_start)
+        if len(testcases) > 1:
+            if not testcases[-1]:
+                testcases.pop()
+            testcases = ','.join(map(lambda x: str(x), testcases))+','
+        else:
+            testcases = ''
+        if len(testcase_scenes) > 1:
+            if not testcase_scenes[-1]:
+                testcase_scenes.pop()
+            testcase_scenes = ','.join(map(lambda x: str(x), testcase_scenes))+','
+        else:
+            testcase_scenes = ''
         job = Job.query.get(_id)
         old_cron = job.cron
         job.name = name
@@ -98,7 +102,7 @@ class JobList(MethodView):
         search, user_id, page, pagesize, _all, _id = get_values('search', 'user_id', 'page', 'pagesize', 'all', 'id')
         print('search', search, user_id, page, pagesize, _id)
         if _id:
-            data = Job.query.get(_id).get_dict()
+            data = Job.query.get(_id).to_dict()
             return jsonify({'list': data})
         if not isinstance(page, int) or page <= 0:
             page = 1
@@ -113,7 +117,7 @@ class JobList(MethodView):
                     pagesize * (page - 1)).all()
                 count = Job.query.filter(Job.user_id == user_id). \
                     order_by(Job.timestamp.desc(), Job.id.desc()).count()
-            all_to_dict(_list)
+            all_to_dict(_list, model=Job)
         else:
             _list, count = [{}], 0
         return jsonify({'list': _list, 'count': count})

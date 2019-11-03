@@ -1,4 +1,4 @@
-from modles import TestCaseScene
+from modles import TestCaseScene, Job
 
 
 def all_to_dict(objects, *args, wait=False, model=None):
@@ -18,6 +18,8 @@ def all_to_dict(objects, *args, wait=False, model=None):
                     objects[i] = objects[i].to_dict(case_list)
                 else:
                     objects[i] = objects[i].to_dict()
+            elif model == Job:
+                objects[i] = objects[i].to_dict()
             else:
                 objects[i] = objects[i].get_dict()
     if args:
