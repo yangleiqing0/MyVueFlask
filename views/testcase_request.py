@@ -1,12 +1,10 @@
 # encoding=utf-8
-import json
-import time
-import operator
+
 from _datetime import datetime
 from flask.views import MethodView
-from flask import render_template, Blueprint, request, session, current_app
-from common import AnalysisParams, to_execute_testcase, NullObject, AssertMethod
-from views.mysql import mysqlrun
+from flask import render_template, Blueprint, request, session, current_app, jsonify
+from common import AnalysisParams, to_execute_testcase, NullObject, AssertMethod, to_dict
+from views import mysqlrun, json, time
 from modles import datetime, TestCases, TestCaseResult, CaseGroup, TestCaseStartTimes, TestCaseScene, User, db, \
     Variables
 
@@ -17,10 +15,10 @@ class TestCaseRequest(MethodView):
 
     def get(self):
         user_id = session.get('user_id')
-        user = User.query.get(user_id)
         print('user_id:', user_id)
         case_groups = CaseGroup.query.filter(CaseGroup.user_id == user_id).order_by(
             CaseGroup.updated_time.desc(), CaseGroup.id.desc()).all()
+        # to_dict(case_groups)
         case_groups_new = []
         for case_group in case_groups:
             case_group_NullObject = NullObject()
@@ -30,13 +28,13 @@ class TestCaseRequest(MethodView):
             testcases = TestCases.query.join(CaseGroup, CaseGroup.id == TestCases.group_id).filter(
                 TestCases.testcase_scene_id.is_(None), TestCases.group_id == case_group.id, TestCases.user_id == user_id
             ).order_by(TestCases.updated_time.desc(), TestCases.id.desc()).all()
-            print(' %s testcases_:' % case_group, testcases)
+        #     print(' %s testcases_:' % case_group, testcases)
             for testcase in testcases:
                 testcase_NullObject = NullObject()
                 testcase_NullObject.id = testcase.id
                 testcase_NullObject.name = testcase.name
                 testcase_NullObject.is_testcase_scene = 0
-                testcase_list.append(testcase_NullObject)
+                testcase_list.append(testcase_NullObject.__dict__)
             try:
                 case_group_scene = TestCaseScene.query.join(CaseGroup, CaseGroup.id == TestCaseScene.group_id).filter(
                     TestCaseScene.user_id == user_id, CaseGroup.name == case_group.name).order_by(
@@ -46,15 +44,15 @@ class TestCaseRequest(MethodView):
                     testcase_scene_NullObject.id = testcase_scene.id
                     testcase_scene_NullObject.name = testcase_scene.name
                     testcase_scene_NullObject.is_testcase_scene = 1
-                    testcase_list.append(testcase_scene_NullObject)
+                    testcase_list.append(testcase_scene_NullObject.__dict__)
             except KeyError:
                 pass
 
             case_group_NullObject.testcase_list = testcase_list
-            case_groups_new.append(case_group_NullObject)
-            print('testcase_list: ', case_group_NullObject.name, testcase_list)
+            case_groups_new.append(case_group_NullObject.__dict__)
+        print('testcase_list: ', case_groups_new)
 
-        return render_template('test_case_request/test_case_request.html', case_groups=case_groups_new)
+        return jsonify({'list': case_groups_new})
 
     def post(self):
         print('TestCaseRequest post request.form: ', request.form)
@@ -232,7 +230,7 @@ class TestCaseTimeGet(MethodView):
         return json.dumps({"testcase_time_id": str(testcase_time.id), 'scene_async': scene_async})
 
 
-test_case_request_blueprint.add_url_rule('/testcaserequest/', view_func=TestCaseRequest.as_view('test_case_request'))
+test_case_request_blueprint.add_url_rule('/request_play', view_func=TestCaseRequest.as_view('request_play'))
 test_case_request_blueprint.add_url_rule('/testcaserequeststart/', view_func=TestCaseRequestStart.as_view('test_case_request_start'))
 test_case_request_blueprint.add_url_rule('/testcasetimeget/', view_func=TestCaseTimeGet.as_view('test_case_time_get'))
 
