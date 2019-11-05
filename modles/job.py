@@ -28,11 +28,14 @@ class Job(BaseModel, db.Model):
 
     def to_dict(self):
         case_list, scene_list = [], []
+
         if len(self.testcases) > 0:
             for case_id in eval(self.testcases):
-                case_list.append(TestCases.query.get(case_id).get_dict('id', 'name'))
+                if TestCases.query.get(case_id):
+                    case_list.append(TestCases.query.get(case_id).get_dict('id', 'name'))
         if len(self.testcase_scenes) > 0:
             for scene_id in eval(self.testcase_scenes):
-                scene_list.append(TestCaseScene.query.get(scene_id).get_dict('id', 'name'))
+                if TestCaseScene.query.get(scene_id):
+                    scene_list.append(TestCaseScene.query.get(scene_id).get_dict('id', 'name'))
         return dict(id=self.id, name=self.name, description=self.description, triggers=self.triggers, cron=self.cron,
                     is_start=self.is_start, mail_id=self.mail_id, testcases=case_list, testcase_scenes=scene_list)

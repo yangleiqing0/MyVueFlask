@@ -36,6 +36,7 @@ class TestCaseSceneTestCaseList(MethodView):
         case_groups = user.user_case_groups
         case_groups, model_scenes, model_cases = all_to_dict(_list, case_groups, model_scenes, model_cases,
                                                              model=TestCaseScene)
+
         return jsonify({
             'list': _list,
             'groups': case_groups,

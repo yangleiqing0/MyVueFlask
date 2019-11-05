@@ -202,7 +202,7 @@ class TestCaseUrls(MethodView):
         urls_sql = 'select url from testcases where user_id=%s'
         urls = list(set(cdb().query_db(urls_sql, params=(user_id,))))
         testcases_urls = []
-        [testcases_urls.append(AnalysisParams().analysis_params(url[0])) for url in urls]
+        [testcases_urls.append(url[0]) for url in urls]
         testcases_urls.sort()
         case_urls = []
         [case_urls.append({'url': url})for url in testcases_urls]
