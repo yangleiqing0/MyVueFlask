@@ -5,6 +5,7 @@ from flask.views import MethodView
 from flask import render_template, Blueprint, request, session, current_app, jsonify
 from common import AnalysisParams, to_execute_testcase, NullObject, AssertMethod, to_dict
 from views import mysqlrun, json, time
+from views.com import get_values
 from modles import datetime, TestCases, TestCaseResult, CaseGroup, TestCaseStartTimes, TestCaseScene, User, db, \
     Variables
 
@@ -58,24 +59,21 @@ class TestCaseRequest(MethodView):
         return jsonify({'list': case_groups_new})
 
     def post(self):
-        print('TestCaseRequest post request.form: ', request.form)
-        testcase_ids = request.form.getlist('testcase')
-        for _i in range(len(testcase_ids)):
-            testcase_ids[_i] = int(testcase_ids[_i])
-        print("request_from_list: ", testcase_ids)
+        testcase_ids, testcase_scene_ids = get_values('case_list', 'scene_list')
+        print('TestCaseRequest post request.form: ', testcase_ids, testcase_scene_ids)
+
         scene_case_list = []
         testcase_list = []
         for index, testcase_id in enumerate(testcase_ids):
-            testcase = TestCases.query.get(testcase_id)
+            testcase = TestCases.query.get(int(testcase_id))
             testcase.name = AnalysisParams().analysis_params(testcase.name)
-            testcase_list.append(testcase)
+            testcase_list.append(testcase.get_dict('id', 'name'))
             scene_case_list.append([testcase.id, ])
         print('testcase_list post: ', testcase_list,  scene_case_list)
 
-        testcase_scene_ids = request.form.getlist('testcase_scene')
         scene_list = []
         for testcase_scene_id in testcase_scene_ids:
-            testcase_scene = TestCaseScene.query.get(testcase_scene_id)
+            testcase_scene = TestCaseScene.query.get(int(testcase_scene_id))
         #     scene_list.append(_testcase_scene)
         #
         # cmpfun = operator.attrgetter('updated_time')
@@ -85,15 +83,15 @@ class TestCaseRequest(MethodView):
             testcases = testcase_scene.testcases
             case_list = []
             for testcase in testcases:
+                testcase.name = AnalysisParams().analysis_params(testcase.name)
                 testcase.scene_name = testcase.testcase_scene.name
-                testcase_list.append(testcase)
+                testcase_list.append(testcase.get_dict('id', 'name', 'scene_name'))
                 case_list.append(testcase.id)
                 testcase_ids.append(testcase.id)
             scene_case_list.append(case_list)
         print("request_testcase_ids_list: ", scene_list)
 
-        return render_template('test_case_request/test_case_request_list.html', items=testcase_list,
-                               scene_case_list=scene_case_list, testcase_ids=testcase_ids)
+        return jsonify({'list': testcase_list})
 
 
 class TestCaseRequestStart(MethodView):
