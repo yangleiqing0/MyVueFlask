@@ -9,39 +9,49 @@ class AssertMethod:
         if ',' in hope_result:
             self.asserts = hope_result.split(',')
         else:
-            self.assertmethod, self.hoperesult = hope_result.split(':', 1)
+            try:
+                self.assertmethod, self.hoperesult = hope_result.split(':', 1)
+            except Exception as e:
+                print('期望结果异常：', e)
+                self.assertmethod = '包含'
+                self.hoperesult = 'ewedew@$!!##$@#$!@'
+
         # print("self.assertmethod: %s, self.hoperesult: %s" % (self.assertmethod, self.hoperesult))
         # self.actual_result = str(self.actual_result)
         # print('self.actual_result: ', self.actual_result)
 
     def assert_method(self):
-        if self.asserts:
-            for _assert in self.asserts:
-                assertmethod, hoperesult = _assert.split(':', 1)
-                if '包含' in assertmethod:
-                    result = self.assert_in(hoperesult)
-                elif '等于' in assertmethod:
-                    result = self.assert_eq(hoperesult)
+        try:
+            if self.asserts:
+                for _assert in self.asserts:
+                    assertmethod, hoperesult = _assert.split(':', 1)
+                    if '包含' in assertmethod:
+                        result = self.assert_in(hoperesult)
+                    elif '等于' in assertmethod:
+                        result = self.assert_eq(hoperesult)
+                    else:
+                        result = ''
+                    if result == '测试失败':
+                        return '测试失败'
+                return '测试成功'
+            else:
+
+                if '不包含' in self.assertmethod:
+                    result = self.not_assert_in(self.hoperesult)
+                elif '不等于' in self.assertmethod:
+                    result = self.not_assert_eq(self.hoperesult)
+                elif '等于' in self.assertmethod:
+                    result = self.assert_eq(self.hoperesult)
+                elif '包含' in self.assertmethod:
+                    result = self.assert_in(self.hoperesult)
+                elif '大于' in self.assertmethod:
+                    result = self.assert_gt(self.hoperesult)
                 else:
                     result = ''
-                if result == '测试失败':
-                    return '测试失败'
-            return '测试成功'
-        else:
-
-            if '不包含' in self.assertmethod:
-                result = self.not_assert_in(self.hoperesult)
-            elif '不等于' in self.assertmethod:
-                result = self.not_assert_eq(self.hoperesult)
-            elif '等于' in self.assertmethod:
-                result = self.assert_eq(self.hoperesult)
-            elif '包含' in self.assertmethod:
-                result = self.assert_in(self.hoperesult)
-            elif '大于' in self.assertmethod:
-                result = self.assert_gt(self.hoperesult)
-            else:
-                result = ''
-            return result
+                return result
+        except Exception as e:
+            print('期望结果异常：', e)
+            return '期望结果解析错误'
 
     def assert_eq(self, hoperesult):
         if self.actual_result == hoperesult:    # 返回结果与期望结果相等

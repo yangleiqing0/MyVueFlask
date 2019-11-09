@@ -82,6 +82,27 @@ class Test:
                     new_sql_value_result=self.new_sql_value_result, test_result=self.test_result, scene_id=self.scene_id)
 
 
+def add_message(testcase_time_id):
+    testcase_scene_ids, testcase_scene_list, testcase_scene_testcases_after_list, testcase_results, testcase_time, items = get_testcase_scene_message(
+        testcase_time_id)
+    for testcase_scene_id in testcase_scene_ids:
+        testcase_scene = TestCaseScene.query.get(testcase_scene_id)
+        testcase_scene_list.append(testcase_scene)
+        testcase_scene_testcases = []
+        for testcase_scene_testcase in testcase_scene_testcases_after_list:
+            if testcase_scene_testcase.scene_id == testcase_scene.id:
+                testcase_scene_testcases.append(testcase_scene_testcase)
+            testcase_scene.test_cases = testcase_scene_testcases
+    allocation = EnvMessage(testcase_results, testcase_time_id, testcase_time, testcase_scene_list)
+    print('allocation:', allocation.fail_sum)
+    time_message = TimeMessage(allocation.test_name, allocation.zdbm_version, allocation.test_pl, allocation.test_net,
+                               allocation.title_name, allocation.fail_sum, allocation.test_sum, allocation.test_success,
+                               allocation.time_strftime, allocation.score, testcase_time_id)
+    db.session.add(time_message)
+    db.session.commit()
+    return items, allocation, testcase_scene_list
+
+
 class Testcaseresult:
 
     def __init__(self, testcase_time_id, result="testcases"):
@@ -122,8 +143,8 @@ class Testcaseresult:
 
 class TestCaseReport(MethodView):
 
-    def post(self, email=False):
-        testcase_time_id = get_values('id')
+    def get(self, email=False):
+        testcase_time_id = get_values('id', post=False)
         print('testcase_time_id:', testcase_time_id)
         testcase_results = Testcaseresult(testcase_time_id).testcase_results
         items = []
@@ -145,26 +166,12 @@ class TestCaseReport(MethodView):
             'items': items
         })
 
-
-def add_message(testcase_time_id):
-    testcase_scene_ids, testcase_scene_list, testcase_scene_testcases_after_list, testcase_results, testcase_time, items = get_testcase_scene_message(
-        testcase_time_id)
-    for testcase_scene_id in testcase_scene_ids:
-        testcase_scene = TestCaseScene.query.get(testcase_scene_id)
-        testcase_scene_list.append(testcase_scene)
-        testcase_scene_testcases = []
-        for testcase_scene_testcase in testcase_scene_testcases_after_list:
-            if testcase_scene_testcase.scene_id == testcase_scene.id:
-                testcase_scene_testcases.append(testcase_scene_testcase)
-            testcase_scene.test_cases = testcase_scene_testcases
-    allocation = EnvMessage(testcase_results, testcase_time_id, testcase_time, testcase_scene_list)
-    print('allocation:', allocation.fail_sum)
-    time_message = TimeMessage(allocation.test_name, allocation.zdbm_version, allocation.test_pl, allocation.test_net,
-                               allocation.title_name, allocation.fail_sum, allocation.test_sum, allocation.test_success,
-                               allocation.time_strftime, allocation.score, testcase_time_id)
-    db.session.add(time_message)
-    db.session.commit()
-    return items, allocation, testcase_scene_list
+    def post(self):
+        testcase_time_id = get_values('time_id')
+        # 生成测试报告
+        get_report(testcase_time_id)
+        add_message(testcase_time_id)
+        return jsonify(True)
 
 
 def get_testcase_scene_message(testcase_time_id):

@@ -253,10 +253,14 @@ class Report:
                     else:
                         self.worksheet2.merge_range('%s:%s' % ("O" + str(temp - testcase_scene_count + 1), "O" + str(temp)),
                                                      item["t_testcase_scene"], self.get_format_center(self.workbook))
-                    testcase_scene_result = TestCaseSceneResult(testcase_scene_count_dict[item['t_testcase_scene']][1],
-                                                                item['t_testcase_scene'],
-                                                                testcase_scene_count, testcase_scene.result, testcase_time_id)
-                    db.session.add(testcase_scene_result)
+                    if TestCaseSceneResult.query.filter(TestCaseSceneResult.time_id == testcase_time_id,
+                                                        TestCaseSceneResult.scene_id == testcase_scene_count_dict[item['t_testcase_scene']][1]).count():
+                        pass
+                    else:
+                        testcase_scene_result = TestCaseSceneResult(testcase_scene_count_dict[item['t_testcase_scene']][1],
+                                                                    item['t_testcase_scene'],
+                                                                    testcase_scene_count, testcase_scene.result, testcase_time_id)
+                        db.session.add(testcase_scene_result)
                     if testcase_scene.result != '测试成功':
                         if testcase_scene_count == 1:
                             self.write_center(self.worksheet2, "P" + str(temp), testcase_scene.result,

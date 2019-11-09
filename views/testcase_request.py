@@ -59,15 +59,21 @@ class TestCaseRequest(MethodView):
         return jsonify({'list': case_groups_new})
 
     def post(self):
-        testcase_ids, testcase_scene_ids = get_values('case_list', 'scene_list')
+        time_id = get_values('id')
+        case_time = TestCaseStartTimes.query.get(time_id)
+        testcase_ids, testcase_scene_ids = json.loads(case_time.case_list), json.loads(case_time.scene_list)
         print('TestCaseRequest post request.form: ', testcase_ids, testcase_scene_ids)
-
+        for _i in range(len(testcase_ids)):
+            testcase_ids[_i] = int(testcase_ids[_i])
         scene_case_list = []
         testcase_list = []
         for index, testcase_id in enumerate(testcase_ids):
             testcase = TestCases.query.get(int(testcase_id))
             testcase.name = AnalysisParams().analysis_params(testcase.name)
-            testcase_list.append(testcase.get_dict('id', 'name'))
+            case_dict = testcase.get_dict('id', 'name')
+            case_dict['response_body'] = get_response_body(testcase.id, time_id)
+            case_dict['is_show'] = False
+            testcase_list.append(case_dict)
             scene_case_list.append([testcase.id, ])
         print('testcase_list post: ', testcase_list,  scene_case_list)
 
@@ -85,25 +91,40 @@ class TestCaseRequest(MethodView):
             for testcase in testcases:
                 testcase.name = AnalysisParams().analysis_params(testcase.name)
                 testcase.scene_name = testcase.testcase_scene.name
-                testcase_list.append(testcase.get_dict('id', 'name', 'scene_name'))
+                case_dict = testcase.get_dict('id', 'name', 'scene_name')
+                case_dict['response_body'] = get_response_body(testcase.id, time_id)
+                case_dict['is_show'] = False
+                testcase_list.append(case_dict)
                 case_list.append(testcase.id)
                 testcase_ids.append(testcase.id)
             scene_case_list.append(case_list)
         print("request_testcase_ids_list: ", scene_list)
 
-        return jsonify({'list': testcase_list})
+        return jsonify({'list': testcase_list, 'scene_case_list': scene_case_list, 'testcase_ids': testcase_ids})
 
 
 class TestCaseRequestStart(MethodView):
 
-    def post(self, request_is_xhr=None):
-        if request.is_xhr or request_is_xhr:
-            print(request.args)
-            test_case_id = request.form.get('testcase_id')
-            testcase_time_id = request.form.get('test_case_time_id')
-            print('异步请求的test_case_id,testcase_time_id: ', test_case_id, testcase_time_id)
-            response_body = post_testcase(test_case_id, testcase_time_id)
-            return response_body
+    def post(self):
+        print(request.args)
+        test_case_id, testcase_time_id = get_values('case_id', 'time_id')
+        print('异步请求的test_case_id,testcase_time_id: ', test_case_id, testcase_time_id)
+        response_body = post_testcase(test_case_id, testcase_time_id)
+        return jsonify(response_body)
+
+
+def get_response_body(case_id, time_id):
+    response_body = ''
+    print('get_response_body', case_id, time_id)
+    if not case_id:
+        return response_body
+    if TestCaseResult.query.filter(TestCaseResult.testcase_id == case_id,
+                                   TestCaseResult.testcase_start_time_id == time_id).count():
+        case_result = TestCaseResult.query.filter(TestCaseResult.testcase_id == case_id,
+                                                  TestCaseResult.testcase_start_time_id == time_id).first()
+        if case_result.response_body:
+            response_body = case_result.response_body
+    return response_body
 
 
 def post_testcase(test_case_id=None, testcase_time_id=None, testcase=None, is_run=False, is_commit=True):
@@ -131,7 +152,7 @@ def post_testcase(test_case_id=None, testcase_time_id=None, testcase=None, is_ru
                 old_wait_value = mysqlrun(mysql_id=wait.old_wait_mysql, sql=wait.old_wait_sql, is_request=False,
                                           regist=False, cache=True)
                 old_wait_assert_result = AssertMethod(actual_result=old_wait_value,
-                             hope_result=_hope_result).assert_method()
+                                                      hope_result=_hope_result).assert_method()
                 if old_wait_assert_result == "测试成功":
                     break
                 else:
@@ -201,12 +222,22 @@ def post_testcase(test_case_id=None, testcase_time_id=None, testcase=None, is_ru
                         test_result = time_out_new_mes
                         break
     if testcase_time_id:
-        testcase_result = TestCaseResult(test_case_id, testcase.name, url, data, method, hope_result,
-                                         testcase_time_id, response_body, testcase_test_result, old_sql_value=str(old_sql_value),
-                                         new_sql_value=str(new_sql_value), old_sql_value_result=old_sql_value_result,
-                                         new_sql_value_result=new_sql_value_result, result=test_result, scene_id=testcase.testcase_scene_id)
-        # 测试结果实例化
-        db.session.add(testcase_result)
+        # 如果存在此记录，则修改此记录，不存在则创建
+        if TestCaseResult.query.filter(TestCaseResult.testcase_start_time_id == testcase_time_id,
+                                       TestCaseResult.testcase_id == test_case_id).count():
+            case_result = TestCaseResult.query.filter(TestCaseResult.testcase_start_time_id == testcase_time_id,
+                                                      TestCaseResult.testcase_id == test_case_id).first()
+            case_result.response_body = response_body
+            case_result.result = test_result
+        else:
+            testcase_result = TestCaseResult(test_case_id, testcase.name, url, data, method, hope_result,
+                                             testcase_time_id, response_body, testcase_test_result,
+                                             old_sql_value=str(old_sql_value), new_sql_value=str(new_sql_value),
+                                             old_sql_value_result=old_sql_value_result,
+                                             new_sql_value_result=new_sql_value_result,
+                                             result=test_result, scene_id=testcase.testcase_scene_id)
+            # 测试结果实例化
+            db.session.add(testcase_result)
         db.session.commit()
     session.pop(testcase.name)
     if is_run:
@@ -217,23 +248,25 @@ def post_testcase(test_case_id=None, testcase_time_id=None, testcase=None, is_ru
 
 class TestCaseTimeGet(MethodView):
 
-    def get(self):
+    def post(self):
         #  获得本次测试批号和是否开启异步场景功能
-        print('current_app.name: ', current_app.name)
+        # print('current_app.name: ', current_app.name)
         user_id = session.get('user_id')
+        case_list, scene_list = get_values('case_list', 'scene_list')
         time_strftime = datetime.now().strftime('%Y%m%d%H%M%S')
-        testcase_time = TestCaseStartTimes(time_strftime=time_strftime, user_id=user_id)
+        testcase_time = TestCaseStartTimes(time_strftime=time_strftime, user_id=user_id, case_list=json.dumps(case_list),
+                                           scene_list=json.dumps(scene_list))
         db.session.add(testcase_time)
         db.session.commit()
         print('testcase_time: ', testcase_time)
 
         scene_async = Variables.query.filter(Variables.name == '_Scene_Async', Variables.user_id == user_id).first().value
-        return json.dumps({"testcase_time_id": str(testcase_time.id), 'scene_async': scene_async})
+        return jsonify({"time_id": testcase_time.id, 'scene_async': scene_async})
 
 
 test_case_request_blueprint.add_url_rule('/request_play', view_func=TestCaseRequest.as_view('request_play'))
-test_case_request_blueprint.add_url_rule('/testcaserequeststart/', view_func=TestCaseRequestStart.as_view('test_case_request_start'))
-test_case_request_blueprint.add_url_rule('/testcasetimeget/', view_func=TestCaseTimeGet.as_view('test_case_time_get'))
+test_case_request_blueprint.add_url_rule('/request_start', view_func=TestCaseRequestStart.as_view('request_start'))
+test_case_request_blueprint.add_url_rule('/time_get', view_func=TestCaseTimeGet.as_view('time_get'))
 
 
 def get_assert_value(testcase, value):
@@ -274,4 +307,5 @@ def get_assert_value(testcase, value):
             new_sql_value = new_sql_value_result = ''
         # 调用比较的方法判断响应报文是否满足期望
         return new_sql_value, new_sql_value_result
+
 

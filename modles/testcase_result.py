@@ -34,6 +34,8 @@ class TestCaseResult(Base, db.Model):
         self.testcase_method = testcase_method
         self.testcase_hope_result = testcase_hope_result
         self.testcase_start_time_id = testcase_start_time_id
+        if not response_body:
+            response_body = '响应内容为空'
         self.response_body = response_body
         self.testcase_test_result = testcase_test_result
         self.old_sql_value = old_sql_value
