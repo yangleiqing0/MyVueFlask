@@ -13,7 +13,7 @@ def get_list(_object):
         page = 1
     if user_id:
         if _all:
-            _list = _object.query.filter(_object.user_id == user_id). \
+            _list = _object.query.filter(_object.user_id == user_id, _object.name != ''). \
                 order_by(_object.timestamp.desc(), _object.id.desc()).all()
             count = len(_list)
 
@@ -25,7 +25,7 @@ def get_list(_object):
         else:
             _list = _object.query.filter(_object.user_id == user_id, _object.name != ''). \
                 order_by(_object.timestamp.desc(), _object.id.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
-            count = _object.query.filter(_object.user_id == user_id). \
+            count = _object.query.filter(_object.user_id == user_id, _object.name != ''). \
                 order_by(_object.timestamp.desc(), _object.id.desc()).count()
         all_to_dict(_list)
 
