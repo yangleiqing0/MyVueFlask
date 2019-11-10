@@ -1,6 +1,8 @@
+
+
 from flask.views import MethodView
 from flask import Blueprint, jsonify
-from common import get_values
+from common import get_values, datetime
 from modles import CaseGroup, db
 from . import get_list, post_edit, post_del
 
@@ -27,6 +29,15 @@ class CaseGroupDel(MethodView):
         return post_del(CaseGroup, '用例分组')
 
 
+class GroupUp(MethodView):
+    def post(self):
+        _id = get_values('id')
+        group = CaseGroup.query.get(_id)
+        group.updated_time = datetime.now()
+        db.session.commit()
+        return jsonify(msg="分组顺序提升成功")
+
+
 class CaseGroupValidata(MethodView):
 
     def post(self):
@@ -48,5 +59,6 @@ class CaseGroupValidata(MethodView):
 case_group_blueprint.add_url_rule('/group_list', view_func=CaseGroupList.as_view('group_list'))
 case_group_blueprint.add_url_rule('/group_edit', view_func=CaseGroupUpdate.as_view('group_edit'))
 case_group_blueprint.add_url_rule('/group_del', view_func=CaseGroupDel.as_view('group_del'))
+case_group_blueprint.add_url_rule('/group_up', view_func=GroupUp.as_view('group_up'))
 
 case_group_blueprint.add_url_rule('/group_validate', view_func=CaseGroupValidata.as_view('group_validate'))

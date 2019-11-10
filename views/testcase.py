@@ -246,6 +246,15 @@ class TestCaseUpload(MethodView):
         return redirect(url_for('testcase_blueprint.test_case_list'))
 
 
+class CaseUp(MethodView):
+    def post(self):
+        _id = get_values('id')
+        case = TestCases.query.get(_id)
+        case.updated_time = datetime.datetime.now()
+        db.session.commit()
+        return jsonify(msg="用例顺序提升成功")
+
+
 class TestCaseValidata(MethodView):
 
     def post(self):
@@ -308,6 +317,7 @@ testcase_blueprint.add_url_rule('/copy_test_case/', view_func=TestCaseCopy.as_vi
 testcase_blueprint.add_url_rule('/case_url', view_func=TestCaseUrls.as_view('case_url'))
 testcase_blueprint.add_url_rule('/case_download', view_func=TestCaseDownload.as_view('case_download'))
 testcase_blueprint.add_url_rule('/case_upload', view_func=TestCaseUpload.as_view('case_upload'))
+testcase_blueprint.add_url_rule('/case_up', view_func=CaseUp.as_view('case_up'))
 
 testcase_blueprint.add_url_rule('/case_validate', view_func=TestCaseValidata.as_view('case_validate'))
 testcase_blueprint.add_url_rule('/regular_validate', view_func=RegularValidata.as_view('regular_validate'))

@@ -26,11 +26,11 @@ class MysqlList(MethodView):
 
 def mysqlrun(mysql_id=None, sql='', regist_variable='', is_request=True, regist=True, cache=False, is_cache=False):
     print('MysqlRun:', sql, regist_variable)
-    mysql = Mysql.query.get(mysql_id)
-    if not mysql:
+    if not mysql_id:
         return json.dumps('请检查配置数据库')
     if not sql:
         return json.dumps('请输入查询语句')
+    mysql = Mysql.query.get(mysql_id)
     user_id = session.get('user_id')
     if cache:
         host, port, db_name, user, password, sql = session.get('mysql')

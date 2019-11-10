@@ -147,6 +147,15 @@ class TestCaseSceneCopy(MethodView):
         return redirect(url_for('testcase_scene_blueprint.testcase_scene_testcase_list', page=scene_page))
 
 
+class SceneUp(MethodView):
+    def post(self):
+        _id = get_values('id')
+        scene = TestCaseScene.query.get(_id)
+        scene.updated_time = datetime.datetime.now()
+        db.session.commit()
+        return jsonify(msg="场景顺序提升成功")
+
+
 class TestCaseSceneModel(MethodView):
 
     def get(self, testcase_scene_id):
@@ -189,6 +198,7 @@ testcase_scene_blueprint.add_url_rule('/testcase_scene_copy/', view_func=TestCas
 testcase_scene_blueprint.add_url_rule('/scene_list', view_func=TestCaseSceneTestCaseList.as_view('scene_list'))
 testcase_scene_blueprint.add_url_rule('/scene_del', view_func=TestCaseSceneDelete.as_view('scene_del'))
 testcase_scene_blueprint.add_url_rule('/scene_run', view_func=TestCaseSceneRun.as_view('scene_run'))
+testcase_scene_blueprint.add_url_rule('/scene_up', view_func=SceneUp.as_view('scene_up'))
 
 testcase_scene_blueprint.add_url_rule('/scene_validate', view_func=TestCaseSceneUpdateValidate.as_view('scene_validate'))
 
