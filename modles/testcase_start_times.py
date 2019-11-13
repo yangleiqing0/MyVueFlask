@@ -7,8 +7,8 @@ class TestCaseStartTimes(BaseModel, db.Model):
     filename = db.Column(db.String(200))
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))
     time_strftime = db.Column(db.String(40))
-    case_list = db.Column(db.String(1000))
-    scene_list = db.Column(db.String(1000))
+    case_list = db.Column(db.Text)
+    scene_list = db.Column(db.Text)
 
     this_time_testcase_result = db.relationship('TestCaseResult', backref='test_case_which_time')
 
