@@ -58,6 +58,7 @@ class TestCaseSceneRun(MethodView):
             testcase_results.extend(['【%s】' % testcase.name, testcase_result])
         testcase_results_html = '<br>'.join(testcase_results)
         print('TestCaseSceneRun: ', json.dumps({'testcase_results': testcase_results_html}))
+        session['request_{}'.format(session['user_id'])] = ''
         return json.dumps(testcase_results_html)
 
 

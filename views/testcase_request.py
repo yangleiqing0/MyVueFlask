@@ -32,7 +32,7 @@ class TestCaseRequest(MethodView):
             testcases = TestCases.query.join(CaseGroup, CaseGroup.id == TestCases.group_id).filter(
                 TestCases.testcase_scene_id.is_(None), TestCases.group_id == case_group.id, TestCases.user_id == user_id
             ).order_by(TestCases.updated_time.desc(), TestCases.id.desc()).all()
-        #     print(' %s testcases_:' % case_group, testcases)
+            #     print(' %s testcases_:' % case_group, testcases)
             for testcase in testcases:
                 testcase_NullObject = NullObject()
                 testcase_NullObject.id = testcase.id
@@ -75,17 +75,17 @@ class TestCaseRequest(MethodView):
             case_dict['is_show'] = False
             testcase_list.append(case_dict)
             scene_case_list.append([testcase.id, ])
-        print('testcase_list post: ', testcase_list,  scene_case_list)
+        print('testcase_list post: ', testcase_list, scene_case_list)
 
         scene_list = []
         for testcase_scene_id in testcase_scene_ids:
             testcase_scene = TestCaseScene.query.get(int(testcase_scene_id))
-        #     scene_list.append(_testcase_scene)
-        #
-        # cmpfun = operator.attrgetter('updated_time')
-        # scene_list.sort(key=cmpfun, reverse=True)
-        # print('scene_list', scene_list)
-        # for testcase_scene in scene_list:
+            #     scene_list.append(_testcase_scene)
+            #
+            # cmpfun = operator.attrgetter('updated_time')
+            # scene_list.sort(key=cmpfun, reverse=True)
+            # print('scene_list', scene_list)
+            # for testcase_scene in scene_list:
             testcases = testcase_scene.testcases
             case_list = []
             for testcase in testcases:
@@ -128,7 +128,6 @@ def get_response_body(case_id, time_id):
 
 
 def post_testcase(test_case_id=None, testcase_time_id=None, testcase=None, is_run=False, is_commit=True):
-
     if not testcase:
         testcase = TestCases.query.get(test_case_id)
     else:
@@ -137,7 +136,7 @@ def post_testcase(test_case_id=None, testcase_time_id=None, testcase=None, is_ru
     method = testcase.method
     if isinstance(testcase, NullObject):
         url, data = AnalysisParams().analysis_more_params(testcase.url, testcase.data, testcase_name=testcase.name)
-        return to_execute_testcase(testcase, url, data , is_commit=is_commit)
+        return to_execute_testcase(testcase, url, data, is_commit=is_commit)
 
     if testcase.wait:
         # 前置等待验证
@@ -156,14 +155,16 @@ def post_testcase(test_case_id=None, testcase_time_id=None, testcase=None, is_ru
                 if old_wait_assert_result == "测试成功":
                     break
                 else:
-                    print('5s后执行下一次前置验证, 此次查询结果: %s 已执行 %ss  等待超时%s' % (old_wait_value, time_count,  int(wait.old_wait_time) * 60))
+                    print('5s后执行下一次前置验证, 此次查询结果: %s 已执行 %ss  等待超时%s' % (
+                        old_wait_value, time_count, int(wait.old_wait_time) * 60))
                     time_count += 5
                     time.sleep(5)
                 if wait.old_wait_time:
                     if time_count == int(wait.old_wait_time) * 60:
                         time_out_mes = "前置等待超时, 查询结果 %s" % old_wait_value
                         if testcase_time_id:
-                            testcase_result = TestCaseResult(test_case_id, testcase.name, testcase.url, testcase.data, method, hope_result,
+                            testcase_result = TestCaseResult(test_case_id, testcase.name, testcase.url, testcase.data,
+                                                             method, hope_result,
                                                              testcase_time_id, '', '',
                                                              old_sql_value='',
                                                              new_sql_value='',
@@ -213,7 +214,7 @@ def post_testcase(test_case_id=None, testcase_time_id=None, testcase=None, is_ru
                     break
                 else:
                     print('5s后执行下一次后置验证, 此次查询结果: %s 已执行 %ss  等待超时%s' % (
-                    new_wait_value, time_new_count, int(wait.new_wait_time) * 60))
+                        new_wait_value, time_new_count, int(wait.new_wait_time) * 60))
                     time_new_count += 5
                     time.sleep(5)
                 if wait.new_wait_time:
@@ -254,13 +255,15 @@ class TestCaseTimeGet(MethodView):
         user_id = session.get('user_id')
         case_list, scene_list = get_values('case_list', 'scene_list')
         time_strftime = datetime.now().strftime('%Y%m%d%H%M%S')
-        testcase_time = TestCaseStartTimes(time_strftime=time_strftime, user_id=user_id, case_list=json.dumps(case_list),
+        testcase_time = TestCaseStartTimes(time_strftime=time_strftime, user_id=user_id,
+                                           case_list=json.dumps(case_list),
                                            scene_list=json.dumps(scene_list))
         db.session.add(testcase_time)
         db.session.commit()
         print('testcase_time: ', testcase_time)
 
-        scene_async = Variables.query.filter(Variables.name == '_Scene_Async', Variables.user_id == user_id).first().value
+        scene_async = Variables.query.filter(Variables.name == '_Scene_Async',
+                                             Variables.user_id == user_id).first().value
         return jsonify({"time_id": testcase_time.id, 'scene_async': scene_async})
 
 
@@ -279,7 +282,9 @@ def get_assert_value(testcase, value):
             old_sql_value = mysqlrun(mysql_id=testcase.old_sql_id, sql=testcase.old_sql,
                                      regist_variable=old_sql_regist_variable, is_request=False)
             if testcase.old_sql_hope_result:
-                old_sql_value_result = AssertMethod(actual_result=old_sql_value, hope_result=AnalysisParams().analysis_params(testcase.old_sql_hope_result)).assert_method()
+                old_sql_value_result = AssertMethod(actual_result=old_sql_value,
+                                                    hope_result=AnalysisParams().analysis_params(
+                                                        testcase.old_sql_hope_result)).assert_method()
             else:
                 old_sql_value_result = ''
             print('old_sql_value_result:', old_sql_value_result, old_sql_value)
@@ -307,5 +312,3 @@ def get_assert_value(testcase, value):
             new_sql_value = new_sql_value_result = ''
         # 调用比较的方法判断响应报文是否满足期望
         return new_sql_value, new_sql_value_result
-
-

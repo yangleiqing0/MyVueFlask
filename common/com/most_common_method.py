@@ -4,6 +4,11 @@ from .. import datetime, xlrd, time, os, json
 
 class NullObject:
 
+    def __init__(self):
+        self.name = None
+        self.data = None
+        self.url = None
+
     pass
 
 

@@ -24,6 +24,7 @@ class Login(MethodView):
             user = users[0]
             if user.password == password:
                 session['user_id'] = user.id
+                session['request_{}'.format(user.id)] = ''
                 print('login user_id', session.get('user_id'))
                 return jsonify(msg='登录成功', data={'user_id': user.id})
             return jsonify(err='账号或密码错误')

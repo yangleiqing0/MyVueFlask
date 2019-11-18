@@ -27,6 +27,7 @@ def login_required():
     # print('username: ', session.get('username'), request.path, type(session.get('username')))
     print('before', session.get('user_id'), request.path)
     s_uid = session.get('user_id')
+
     if request.path in ('/logout', '/login', '/report_email', '/case_upload'):
         return
     if not s_uid:

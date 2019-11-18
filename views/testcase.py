@@ -23,6 +23,8 @@ class TestCaseRun(MethodView):
         testcase_result, regist_variable_value = post_testcase(testcase=testcase, is_commit=False)
         testcase_results.extend(['【%s】' % testcase.name, testcase_result, '【正则匹配的值】', regist_variable_value])
         testcase_results_html = '<br>'.join(testcase_results)
+        print('testcase_results_html:', session)
+        session['request_{}'.format(session['user_id'])] = ''
         return jsonify(testcase_results_html)
 
 
