@@ -9,10 +9,12 @@ from flask import session
 class MethodRequest:
 
     def __init__(self):
+        self.session = ''
         self.session = requests.session()
         # print('self.session init:', self.session)
         if session.get('request_{}'.format(session.get('user_id'))):
-            # print('self.session if:', session['request_{}'.format(session.get('user_id'))], type(session['request_{}'.format(session.get('user_id'))]))
+            # print('self.session if:', session['request_{}'.format(session.get('user_id'))], type(session['request_{
+            # }'.format(session.get('user_id'))]))
             try:
                 self.session.cookies = requests.utils.cookiejar_from_dict(
                     json.loads(session['request_{}'.format(session.get('user_id'))]))
