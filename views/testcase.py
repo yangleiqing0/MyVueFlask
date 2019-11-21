@@ -16,7 +16,7 @@ class TestCaseRun(MethodView):
     def post(self):
         testcase = NullObject()
         testcase.name, testcase.url, testcase.data, testcase.method, request_headers_id, \
-            testcase.regist_variable, testcase.regular, testcase.group_id \
+        testcase.regist_variable, testcase.regular, testcase.group_id \
             = get_values('name', 'url', 'data', 'method', 'header_id', 'regist_variable', 'regular', 'group_id')
         testcase.testcase_request_header = RequestHeaders.query.get(request_headers_id)
         testcase_results = []
@@ -42,7 +42,7 @@ class TestCastList(MethodView):
             return jsonify({'list': _list})
         user = User.query.get(user_id)
         _list = TestCases.query.filter(TestCases.user_id == user_id, TestCases.testcase_scene_id.is_(None)). \
-            order_by(TestCases.timestamp.desc()).limit(pagesize).offset(pagesize*(page-1)).all()
+            order_by(TestCases.timestamp.desc()).limit(pagesize).offset(pagesize * (page - 1)).all()
         case_groups = user.user_case_groups
         count = TestCases.query.filter(TestCases.user_id == user_id, TestCases.testcase_scene_id.is_(None)). \
             order_by(TestCases.timestamp.desc()).count()
@@ -66,11 +66,11 @@ class UpdateTestCase(MethodView):
 
         _id, user_id, name, url, method, data, group_id, request_headers_id, regist_variable, regular \
             , hope_result, old_sql, new_sql, old_sql_regist_variable, new_sql_regist_variable, \
-            old_sql_hope_result, new_sql_hope_result, old_sql_id, new_sql_id, wait, testcase_scene_id, is_model = get_values(
-                'id', 'user_id', 'name', 'url', 'method', 'data', 'group_id', 'header_id',
-                'regist_variable', 'regular', 'hope_result', 'old_sql', 'new_sql',
-                'old_sql_regist_variable', 'new_sql_regist_variable', 'old_sql_hope_result',
-                'new_sql_hope_result', 'old_mysql', 'new_mysql', 'wait', 'testcase_scene_id', 'is_model')
+        old_sql_hope_result, new_sql_hope_result, old_sql_id, new_sql_id, wait, testcase_scene_id, is_model = get_values(
+            'id', 'user_id', 'name', 'url', 'method', 'data', 'group_id', 'header_id',
+            'regist_variable', 'regular', 'hope_result', 'old_sql', 'new_sql',
+            'old_sql_regist_variable', 'new_sql_regist_variable', 'old_sql_hope_result',
+            'new_sql_hope_result', 'old_mysql', 'new_mysql', 'wait', 'testcase_scene_id', 'is_model')
         if not wait:
             wait = {}
         old_wait_sql, old_wait, old_wait_time, old_wait_mysql, new_wait_sql, new_wait, new_wait_time, new_wait_mysql = \
@@ -207,7 +207,7 @@ class TestCaseUrls(MethodView):
         [testcases_urls.append(url[0]) for url in urls]
         testcases_urls.sort()
         case_urls = []
-        [case_urls.append({'url': url})for url in testcases_urls]
+        [case_urls.append({'url': url}) for url in testcases_urls]
         return jsonify({'list': case_urls})
 
 
@@ -241,11 +241,10 @@ class TestCaseUpload(MethodView):
                 add_upload_testcases(row_list)
                 os.remove(xlsx_path)
             else:
-                flash('错误的文件格式')
-                return redirect(url_for('testcase_blueprint.test_case_list'))
+                return jsonify(err='错误的文件格式')
         else:
-            flash('请选择上传文件')
-        return redirect(url_for('testcase_blueprint.test_case_list'))
+            return jsonify(err='请选择上传文件')
+        return jsonify(msg='用例文件上传成功')
 
 
 class CaseUp(MethodView):
