@@ -25,14 +25,15 @@ app = return_app()
 @app.before_request  # 在请求达到视图前执行
 def login_required():
     # print('username: ', session.get('username'), request.path, type(session.get('username')))
+    if request.path in ('/logout', '/login', '/report_email', '/case_upload'):
+        return
+
     if not session.get('user_id') and get_values('user_id'):
         # 处理gunicorn多个导致登陆后页面有user_id,但是server没有user_id
         session['user_id'] = get_values('user_id')
     print('before', session.get('user_id'), request.path)
     s_uid = session.get('user_id')
 
-    if request.path in ('/logout', '/login', '/report_email', '/case_upload'):
-        return
     if not s_uid:
         return jsonify(out='请重新登录')
     if request.method == 'POST':

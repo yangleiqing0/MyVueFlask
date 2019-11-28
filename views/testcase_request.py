@@ -14,7 +14,7 @@ test_case_request_blueprint = Blueprint('test_case_request_blueprint', __name__)
 
 class TestCaseRequest(MethodView):
 
-    def get(self):
+    def post(self):
         user_id = session.get('user_id')
         print('user_id:', user_id)
         case_groups = CaseGroup.query.filter(CaseGroup.user_id == user_id).order_by(
@@ -58,6 +58,8 @@ class TestCaseRequest(MethodView):
 
         return jsonify({'list': case_groups_new})
 
+
+class TestCaseRequestList(MethodView):
     def post(self):
         time_id = get_values('id')
         case_time = TestCaseStartTimes.query.get(time_id)
@@ -268,6 +270,7 @@ class TestCaseTimeGet(MethodView):
 
 
 test_case_request_blueprint.add_url_rule('/request_play', view_func=TestCaseRequest.as_view('request_play'))
+test_case_request_blueprint.add_url_rule('/request_play_list', view_func=TestCaseRequestList.as_view('request_play_list'))
 test_case_request_blueprint.add_url_rule('/request_start', view_func=TestCaseRequestStart.as_view('request_start'))
 test_case_request_blueprint.add_url_rule('/time_get', view_func=TestCaseTimeGet.as_view('time_get'))
 
