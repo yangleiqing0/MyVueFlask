@@ -43,7 +43,10 @@ class ConnMysql:
         cur.close()
 
     def __del__(self):
-        self.db.close()
+        try:
+            self.db.close()
+        except AttributeError:
+            pass
 
 
 if __name__ == "__main__":
